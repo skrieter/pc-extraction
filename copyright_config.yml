@@ -1,0 +1,9 @@
+license:
+  name: lgpl
+  version: 3
+program:
+  name: PC-Extractor
+  description: Program for extracting presence conditions from SPLs.
+  authors: Sebastian Krieter
+  url: https://github.com/skrieter/pc-extractor
+  year: 2021
