@@ -33,7 +33,7 @@
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.ovgu.spldev</groupId>
+			<groupId>org.spldev</groupId>
 			<artifactId>featurecopp</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
