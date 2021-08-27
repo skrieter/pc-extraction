@@ -26,7 +26,9 @@ import java.io.*;
 import java.nio.file.*;
 
 import org.spldev.formula.clauses.*;
-import org.spldev.pc_extraction.Grouper.*;
+import org.spldev.pc_extraction.convert.*;
+import org.spldev.pc_extraction.convert.Grouper.*;
+import org.spldev.pc_extraction.extraction.cpp.*;
 import org.spldev.util.*;
 import org.spldev.util.io.*;
 import org.spldev.util.io.binary.*;

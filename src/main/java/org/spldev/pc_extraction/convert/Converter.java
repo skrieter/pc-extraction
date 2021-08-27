@@ -20,7 +20,7 @@
  * See <https://github.com/skrieter/pc-extractor> for further information.
  * -----------------------------------------------------------------------------
  */
-package org.spldev.pc_extraction;
+package org.spldev.pc_extraction.convert;
 
 import java.io.*;
 import java.nio.file.*;
@@ -37,6 +37,7 @@ import org.spldev.formula.expression.io.parse.*;
 import org.spldev.formula.expression.io.parse.NodeReader.*;
 import org.spldev.formula.expression.io.parse.Symbols.*;
 import org.spldev.formula.expression.term.*;
+import org.spldev.pc_extraction.util.*;
 import org.spldev.util.tree.*;
 
 public class Converter {

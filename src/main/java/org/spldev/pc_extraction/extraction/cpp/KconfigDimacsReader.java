@@ -20,7 +20,7 @@
  * See <https://github.com/skrieter/pc-extractor> for further information.
  * -----------------------------------------------------------------------------
  */
-package org.spldev.pc_extraction;
+package org.spldev.pc_extraction.extraction.cpp;
 
 import java.io.*;
 import java.nio.charset.*;

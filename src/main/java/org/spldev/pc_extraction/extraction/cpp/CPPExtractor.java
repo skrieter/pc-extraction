@@ -20,13 +20,14 @@
  * See <https://github.com/skrieter/pc-extractor> for further information.
  * -----------------------------------------------------------------------------
  */
-package org.spldev.pc_extraction;
+package org.spldev.pc_extraction.extraction.cpp;
 
 import java.io.*;
 import java.nio.charset.*;
 import java.nio.file.*;
 import java.util.*;
 
+import org.spldev.pc_extraction.util.*;
 import org.spldev.util.logging.*;
 
 import de.ovgu.spldev.featurecopp.config.*;
@@ -71,6 +72,7 @@ public class CPPExtractor {
 	private Path systemPath;
 	private Path outputPath;
 	private List<Path> excludePaths = new ArrayList<>();
+
 	private long fileCounter;
 
 	public CPPExtractor() {
