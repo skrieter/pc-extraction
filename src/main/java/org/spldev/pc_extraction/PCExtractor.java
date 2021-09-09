@@ -72,7 +72,7 @@ public class PCExtractor {
 	public Result<Expressions> loadExpressions(String systemName) {
 		final SerializableObjectFormat<Expressions> format = new SerializableObjectFormat<>();
 		return FileHandler.load(outputPath.resolve("pclist").resolve(systemName)
-				.resolve("grouped_" + groupingValue + "." + format.getFileExtension()), format);
+			.resolve("grouped_" + groupingValue + "." + format.getFileExtension()), format);
 	}
 
 	private void extract(Path systemPath, Path extractDir) {

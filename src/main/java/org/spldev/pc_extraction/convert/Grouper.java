@@ -76,7 +76,7 @@ public class Grouper {
 	public Expressions groupVars2(PresenceConditionList pcList) {
 		final VariableMap newVariables = pcList.getFormula().getVariableMap();
 		final LinkedHashSet<ClauseList> pcs = pcList.stream().flatMap(this::createExpression)
-				.collect(Collectors.toCollection(LinkedHashSet::new));
+			.collect(Collectors.toCollection(LinkedHashSet::new));
 		pcs.addAll(TWiseCombiner.convertLiterals(LiteralList.getLiterals(newVariables)).get(0));
 
 		final Expressions expressions = new Expressions();
@@ -105,10 +105,10 @@ public class Grouper {
 
 	private List<ClauseList> createExpressions(List<PresenceCondition> pcList) {
 		final List<ClauseList> exps = pcList.stream() //
-				.flatMap(this::createExpression) //
-				.peek(Collections::sort) //
-				.distinct() //
-				.collect(Collectors.toList());
+			.flatMap(this::createExpression) //
+			.peek(Collections::sort) //
+			.distinct() //
+			.collect(Collectors.toList());
 
 		sort(exps);
 		return exps;

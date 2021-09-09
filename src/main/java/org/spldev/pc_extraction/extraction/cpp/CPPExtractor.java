@@ -99,7 +99,7 @@ public class CPPExtractor {
 		cppAnalyzer.featureTable.featureTable.clear();
 		try {
 			cppAnalyzer.process(Paths.get("temp"),
-					new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)));
+				new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)));
 		} catch (final Exception e) {
 			Logger.logError("Parsing error: " + e.getMessage());
 		}
@@ -109,19 +109,19 @@ public class CPPExtractor {
 
 		final HashMap<String, FeatureModule> featureTable = cppAnalyzer.featureTable.featureTable;
 		featureTable.values().stream() //
-				.flatMap(module -> module.featureOccurrences.stream()) //
-				.sorted(new LevelComparator()) //
-				.forEach(fo -> {
-					final String expr = getNestedFeatureTree(fo).featureExprToString().replace("defined", "")
-							.replace(" ", "");
-					if (fo.getEndLine() <= 0) {
-						Logger.logError("Invalid range of feature occurence (end line <= 0): " + expr);
-					} else if (fo.getEndLine() >= pcs.length) {
-						Logger.logError("Invalid range of feature occurence: (end line > number of lines)" + expr);
-					} else {
-						Arrays.fill(pcs, fo.getBeginLine() - 1, fo.getEndLine(), expr);
-					}
-				});
+			.flatMap(module -> module.featureOccurrences.stream()) //
+			.sorted(new LevelComparator()) //
+			.forEach(fo -> {
+				final String expr = getNestedFeatureTree(fo).featureExprToString().replace("defined", "")
+					.replace(" ", "");
+				if (fo.getEndLine() <= 0) {
+					Logger.logError("Invalid range of feature occurence (end line <= 0): " + expr);
+				} else if (fo.getEndLine() >= pcs.length) {
+					Logger.logError("Invalid range of feature occurence: (end line > number of lines)" + expr);
+				} else {
+					Arrays.fill(pcs, fo.getBeginLine() - 1, fo.getEndLine(), expr);
+				}
+			});
 
 		return Arrays.asList(pcs);
 	}
@@ -134,7 +134,7 @@ public class CPPExtractor {
 			final FeatureTree nestedFeatureTree = new FeatureTree();
 			nestedFeatureTree.setKeyword(featureTree.getKeyword());
 			nestedFeatureTree
-					.setRoot(new FeatureTree.LogAnd(previousFeatureTree.getRoot(), featureTree.getRoot(), "&&"));
+				.setRoot(new FeatureTree.LogAnd(previousFeatureTree.getRoot(), featureTree.getRoot(), "&&"));
 			return nestedFeatureTree;
 		} else {
 			return featureOccurrence.ftree;
@@ -166,10 +166,10 @@ public class CPPExtractor {
 			fileCounter = 0;
 
 			fileProvider.getFileStream() //
-					.forEach(p -> {
-						Logger.logProgress("(" + ++fileCounter + "/" + fileCount + ") " + p.toString());
-						parse(cppAnalyzer, p);
-					});
+				.forEach(p -> {
+					Logger.logProgress("(" + ++fileCounter + "/" + fileCount + ") " + p.toString());
+					parse(cppAnalyzer, p);
+				});
 			return true;
 		} catch (final Exception e) {
 			Logger.logError(e);

@@ -43,7 +43,7 @@ public class KconfigDimacsReader {
 		final Path modelFile = kbuildPath.resolve("model.dimacs");
 
 		final Set<String> featureNames = Files.lines(featureFile, charset).filter(line -> !line.isEmpty())
-				.collect(Collectors.toSet());
+			.collect(Collectors.toSet());
 		final String source = new String(Files.readAllBytes(modelFile), charset);
 
 		final DimacsReader r = new DimacsReader();
@@ -51,10 +51,10 @@ public class KconfigDimacsReader {
 		final CNF cnf = Clauses.convertToCNF(r.read(new StringReader(source)));
 
 		final Set<String> dirtyVariables = cnf.getVariableMap() //
-				.getNames().stream() //
-				.filter(variable -> !featureNames.contains("CONFIG_" + variable)) //
-				.distinct() //
-				.collect(Collectors.toSet());
+			.getNames().stream() //
+			.filter(variable -> !featureNames.contains("CONFIG_" + variable)) //
+			.distinct() //
+			.collect(Collectors.toSet());
 		final CNF slicedCNF = Clauses.slice(cnf, dirtyVariables);
 
 		final VariableMap slicedVariables = slicedCNF.getVariableMap();
@@ -67,7 +67,7 @@ public class KconfigDimacsReader {
 			for (int i = 0; i < oldLiterals.length; i++) {
 				final int literal = oldLiterals[i];
 				final int var = newVariables.getVariable("CONFIG_" + slicedVariables.getName(literal))
-						.map(Variable::getIndex).get();
+					.map(Variable::getIndex).get();
 				newLiterals[i] = literal > 0 ? var : -var;
 			}
 			newClauseList.add(new LiteralList(newLiterals));

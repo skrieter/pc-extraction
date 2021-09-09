@@ -34,7 +34,7 @@ public class FileProvider {
 	public static final String PCFileRegex = ".+[.](pc)\\Z";
 
 	public static final Function<String, Predicate<Path>> fileFilterCreator = regex -> file -> Files.isReadable(file)
-			&& Files.isRegularFile(file) && file.getFileName().toString().matches(regex);
+		&& Files.isRegularFile(file) && file.getFileName().toString().matches(regex);
 
 	private final List<Path> excludes = new LinkedList<>();
 	private String fileNameRegex = null;
@@ -86,7 +86,7 @@ public class FileProvider {
 	}
 
 	private Predicate<Path> getFilePredicate() {
-		Predicate<Path> filter = file -> Files.isRegularFile(file);
+		Predicate<Path> filter = Files::isRegularFile;
 		if ((fileNameRegex != null) && !fileNameRegex.isEmpty()) {
 			filter = filter.and(fileFilterCreator.apply(fileNameRegex));
 		}
@@ -94,7 +94,7 @@ public class FileProvider {
 	}
 
 	private Predicate<Path> getFolderPredicate(Path root) {
-		Predicate<Path> filter = file -> Files.isDirectory(file);
+		Predicate<Path> filter = Files::isDirectory;
 		filter = filter.and(file -> {
 			final int nameCount = root.getNameCount();
 			final int nameCount2 = file.getNameCount();
