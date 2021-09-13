@@ -62,8 +62,8 @@ public class CPPExtractor {
 		}
 
 		private int getLevel(FeatureModule.FeatureOccurrence featureOccurrence) {
-			final FeatureModule.FeatureOccurrence enclosingFeatureOccurence = featureOccurrence.enclosing;
-			return enclosingFeatureOccurence != null ? getLevel(enclosingFeatureOccurence) + 1 : 0;
+			final FeatureModule.FeatureOccurrence enclosingFeatureOccurrence = featureOccurrence.enclosing;
+			return enclosingFeatureOccurrence != null ? getLevel(enclosingFeatureOccurrence) + 1 : 0;
 		}
 	}
 
@@ -115,9 +115,9 @@ public class CPPExtractor {
 				final String expr = getNestedFeatureTree(fo).featureExprToString().replace("defined", "")
 					.replace(" ", "");
 				if (fo.getEndLine() <= 0) {
-					Logger.logError("Invalid range of feature occurence (end line <= 0): " + expr);
+					Logger.logError("Invalid range of feature occurrence (end line <= 0): " + expr);
 				} else if (fo.getEndLine() >= pcs.length) {
-					Logger.logError("Invalid range of feature occurence: (end line > number of lines)" + expr);
+					Logger.logError("Invalid range of feature occurrence: (end line > number of lines)" + expr);
 				} else {
 					Arrays.fill(pcs, fo.getBeginLine() - 1, fo.getEndLine(), expr);
 				}
@@ -127,10 +127,10 @@ public class CPPExtractor {
 	}
 
 	private FeatureTree getNestedFeatureTree(FeatureModule.FeatureOccurrence featureOccurrence) {
-		final FeatureModule.FeatureOccurrence enclosingFeatureOccurence = featureOccurrence.enclosing;
-		if (enclosingFeatureOccurence != null) {
+		final FeatureModule.FeatureOccurrence enclosingFeatureOccurrence = featureOccurrence.enclosing;
+		if (enclosingFeatureOccurrence != null) {
 			final FeatureTree featureTree = featureOccurrence.ftree;
-			final FeatureTree previousFeatureTree = getNestedFeatureTree(enclosingFeatureOccurence);
+			final FeatureTree previousFeatureTree = getNestedFeatureTree(enclosingFeatureOccurrence);
 			final FeatureTree nestedFeatureTree = new FeatureTree();
 			nestedFeatureTree.setKeyword(featureTree.getKeyword());
 			nestedFeatureTree
