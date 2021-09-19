@@ -39,16 +39,6 @@ public class PCExtractor {
 	private boolean saveResults = true;
 	private Grouping groupingValue = Grouping.PC_ALL_FM;
 
-	private Path outputPath;
-
-	public PCExtractor(Path outputPath) {
-		this.outputPath = outputPath;
-	}
-
-	public void setOutputPath(Path outputPath) {
-		this.outputPath = outputPath.toAbsolutePath().normalize();
-	}
-
 	public void setSaveIntermediateResults(boolean saveIntermediateResults) {
 		saveResults = saveIntermediateResults;
 	}
@@ -57,7 +47,7 @@ public class PCExtractor {
 		this.groupingValue = groupingValue;
 	}
 
-	public Expressions extract(CNF fmFormula, Path systemPath) throws Exception {
+	public Expressions extract(Path outputPath, Path systemPath, CNF fmFormula) throws Exception {
 		final Path pcListDir = outputPath.resolve("pclist").resolve(systemPath.getFileName());
 		final Path extractDir = outputPath.resolve("extract");
 		Files.createDirectories(pcListDir);
@@ -69,7 +59,7 @@ public class PCExtractor {
 		return expressions;
 	}
 
-	public Result<Expressions> loadExpressions(String systemName) {
+	public Result<Expressions> loadExpressions(Path outputPath, String systemName) {
 		final SerializableObjectFormat<Expressions> format = new SerializableObjectFormat<>();
 		return FileHandler.load(outputPath.resolve("pclist").resolve(systemName)
 			.resolve("grouped_" + groupingValue + "." + format.getFileExtension()), format);
