@@ -31,14 +31,14 @@ import org.spldev.formula.clauses.*;
 import org.spldev.formula.clauses.LiteralList.*;
 import org.spldev.formula.expression.*;
 import org.spldev.formula.expression.atomic.literal.*;
-import org.spldev.formula.expression.compound.*;
 import org.spldev.formula.expression.io.parse.*;
 import org.spldev.formula.expression.io.parse.NodeReader.*;
 import org.spldev.formula.expression.io.parse.Symbols.*;
 import org.spldev.formula.expression.term.*;
+import org.spldev.formula.expression.transform.*;
 import org.spldev.pc_extraction.util.*;
 import org.spldev.util.data.*;
-import org.spldev.util.tree.*;
+import org.spldev.util.logging.*;
 
 public class Converter {
 
@@ -95,10 +95,11 @@ public class Converter {
 				return lines.subList(1, lines.size()).stream() //
 					.filter(expr -> !expr.isEmpty()).distinct() //
 					.map(expr -> {
-						final Formula formula = nodeReader.read(expr).get();
+						Formula formula = nodeReader.read(expr).get();
 						if (formula == null) {
 							return null;
 						} else {
+							formula = NormalForms.simplifyForNF(formula);
 							Formulas.getVariableStream(formula) //
 								.map(Variable::getName) //
 								.forEach(pcNames::add);
@@ -110,64 +111,53 @@ public class Converter {
 
 		final CNF modelFormula = fmFormula != null ? fmFormula : new CNF(VariableMap.fromNames(pcNames));
 
+		final NodeWriter nodeWriter = new NodeWriter();
+		nodeWriter.setSymbols(ShortSymbols.INSTANCE);
+
+		final List<String> convertedDNFs = new ArrayList<>();
+
 		final HashMap<String, PresenceCondition> pcMap = new HashMap<>();
 		final List<PresenceCondition> convertedPCs = pcFormulas.stream() //
 			.map(tempPC -> {
 				PresenceCondition pc = pcMap.get(tempPC.formulaString);
 				if (pc == null) {
 					final VariableMap variableMap = modelFormula.getVariableMap();
-					final ClauseList clauses = new ClauseList();
 					final CNF dnf;
 					final CNF negatedDnf;
-					if (Formulas.isCNF(tempPC.formula)) {
-						final Formula cnfFormula = Trees.cloneTree(tempPC.formula);
-						cnfFormula.mapChildren(c -> (c instanceof Literal) ? new Or((Literal) c) : null);
-						cnfFormula.getChildren().stream().map(exp -> getClause(exp, variableMap))
-							.filter(Objects::nonNull).forEach(clauses::add);
-						final CNF cnf = new CNF(variableMap, clauses);
-						dnf = new CNF(variableMap, Clauses.convertNF(cnf.getClauses()));
-						negatedDnf = new CNF(variableMap, cnf.getClauses().negate());
-					} else if (Formulas.isDNF(tempPC.formula)) {
-						final Formula dnfFormula = Trees.cloneTree(tempPC.formula);
-						dnfFormula.mapChildren(c -> (c instanceof Literal) ? new And((Literal) c) : null);
-						dnfFormula.getChildren().stream().map(exp -> getClause(exp, variableMap))
-							.filter(Objects::nonNull).forEach(clauses::add);
-						dnf = new CNF(variableMap, clauses);
-						final CNF cnf = new CNF(variableMap, Clauses.convertNF(dnf.getClauses()));
-						negatedDnf = new CNF(variableMap, cnf.getClauses().negate());
-					} else {
-						if (tempPC.formula instanceof Or) {
-							final Formula dnfFormula = Formulas.toDNF(tempPC.formula).get();
-							dnfFormula.mapChildren(c -> (c instanceof Literal) ? new And((Literal) c) : null);
-							dnfFormula.getChildren().stream().map(exp -> getClause(exp, variableMap))
-								.filter(Objects::nonNull).forEach(clauses::add);
+					if (tempPC.formula instanceof Literal) {
+						convertedDNFs.add(nodeWriter.write(tempPC.formula));
+						final LiteralList clause = getClause(tempPC.formula, variableMap);
+						if (clause != null) {
+							final ClauseList clauses = new ClauseList();
+							clauses.add(clause);
 							dnf = new CNF(variableMap, clauses);
-							final CNF cnf = new CNF(variableMap, Clauses.convertNF(dnf.getClauses()));
-							negatedDnf = new CNF(variableMap, cnf.getClauses().negate());
-						} else if (tempPC.formula instanceof And) {
-							final Formula cnfFormula = Formulas.toCNF(tempPC.formula).get();
-							cnfFormula.mapChildren(c -> (c instanceof Literal) ? new Or((Literal) c) : null);
-							cnfFormula.getChildren().stream().map(exp -> getClause(exp, variableMap))
-								.filter(Objects::nonNull).forEach(clauses::add);
-							final CNF cnf = new CNF(variableMap, clauses);
-							dnf = new CNF(variableMap, Clauses.convertNF(cnf.getClauses()));
-							negatedDnf = new CNF(variableMap, cnf.getClauses().negate());
-						} else if (tempPC.formula instanceof Literal) {
-							final LiteralList clause = getClause(tempPC.formula, variableMap);
-							if (clause != null) {
-								clauses.add(clause);
-							}
-							final CNF cnf = new CNF(variableMap, clauses);
-							dnf = new CNF(variableMap, Clauses.convertNF(cnf.getClauses()));
-							negatedDnf = new CNF(variableMap, cnf.getClauses().negate());
+							negatedDnf = new CNF(variableMap, clauses.negate());
 						} else {
-							pc = new PresenceCondition();
-							pcMap.put(tempPC.formulaString, pc);
-							return pc;
+							dnf = null;
+							negatedDnf = null;
 						}
+					} else {
+						dnf = Formulas.toDNF(tempPC.formula).map(f -> {
+							convertedDNFs.add(nodeWriter.write(f));
+							final ClauseList clauses = new ClauseList();
+							f.getChildren().stream() //
+								.map(exp -> getClause(exp, variableMap)) //
+								.filter(Objects::nonNull) //
+								.forEach(clauses::add);
+							return new CNF(variableMap, clauses);
+						}).orElse((CNF) null);
+						negatedDnf = Formulas.toCNF(tempPC.formula).map(f -> {
+							final ClauseList cnfClauses = new ClauseList();
+							f.getChildren().stream() //
+								.map(exp -> getClause(exp, variableMap)) //
+								.filter(Objects::nonNull) //
+								.forEach(cnfClauses::add);
+							return new CNF(variableMap, cnfClauses.negate());
+						}).orElse((CNF) null);
 					}
-					if (negatedDnf.getClauses().isEmpty() || (negatedDnf.getClauses().get(0).size() == 0)
-						|| dnf.getClauses().isEmpty() || (dnf.getClauses().get(0).size() == 0)) {
+					if ((negatedDnf == null) || negatedDnf.getClauses().isEmpty() || (negatedDnf.getClauses().get(0)
+						.size() == 0)
+						|| (dnf == null) || dnf.getClauses().isEmpty() || (dnf.getClauses().get(0).size() == 0)) {
 						pc = new PresenceCondition();
 					} else {
 						pc = new PresenceCondition(tempPC.sourceFilePath, dnf, negatedDnf);
@@ -186,6 +176,13 @@ public class Converter {
 		final PresenceConditionList presenceConditionList = new PresenceConditionList(convertedPCs, modelFormula);
 		presenceConditionList.setPCNames(new ArrayList<>(pcNames));
 
+		final Path dnfPCsFile = extractionPath.resolve("filtered_pcs.list");
+		try {
+			Files.write(dnfPCsFile, convertedDNFs, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
+				StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (final IOException e) {
+			Logger.logError(e);
+		}
 		return presenceConditionList;
 	}
 

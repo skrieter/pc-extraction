@@ -26,6 +26,7 @@ import java.io.*;
 import java.nio.charset.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.*;
 
 import org.spldev.pc_extraction.util.*;
 import org.spldev.util.logging.*;
@@ -72,6 +73,7 @@ public class CPPExtractor {
 	private Path systemPath;
 	private Path outputPath;
 	private List<Path> excludePaths = new ArrayList<>();
+	private HashSet<String> allPCs = new HashSet<>();
 
 	private long fileCounter;
 
@@ -149,6 +151,7 @@ public class CPPExtractor {
 		Configuration.REPORT_ONLY = true;
 		this.systemPath = systemPath.toAbsolutePath().normalize();
 		this.outputPath = outputPath.toAbsolutePath().normalize();
+		allPCs.clear();
 		try {
 			final de.ovgu.spldev.featurecopp.log.Logger logger = new de.ovgu.spldev.featurecopp.log.Logger();
 			logger.addInfoStream(new NullStream());
@@ -170,6 +173,10 @@ public class CPPExtractor {
 					Logger.logProgress("(" + ++fileCounter + "/" + fileCount + ") " + p.toString());
 					parse(cppAnalyzer, p);
 				});
+			final Path outputFile = outputPath.resolve(systemPath.getFileName()).resolve("all_pcs" + ".list");
+			final List<String> allPCsSorted = allPCs.stream().sorted().collect(Collectors.toList());
+			Files.write(outputFile, allPCsSorted, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
+				StandardOpenOption.TRUNCATE_EXISTING);
 			return true;
 		} catch (final Exception e) {
 			Logger.logError(e);
@@ -182,6 +189,7 @@ public class CPPExtractor {
 			try {
 				final List<String> lines = Files.readAllLines(p, charset);
 				final List<String> pcs = extractPresenceConditions(cppAnalyzer, lines);
+				pcs.stream().filter(s -> !s.isBlank()).forEach(allPCs::add);
 
 				final Path filePath = p.toAbsolutePath().normalize();
 				final Path relativizeFilePath = systemPath.getFileName().resolve(systemPath.relativize(filePath));
@@ -189,8 +197,11 @@ public class CPPExtractor {
 				final Path outputFile = outputDir.resolve(filePath.getFileName().toString() + ".pc");
 				Files.deleteIfExists(outputFile);
 				Files.createDirectories(outputDir);
-				Files.write(outputFile, Arrays.asList(relativizeFilePath.toString()), StandardOpenOption.CREATE);
-				Files.write(outputFile, pcs, StandardOpenOption.APPEND);
+				Files.write(outputFile, Arrays.asList(relativizeFilePath.toString()), StandardOpenOption.WRITE,
+					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+				if (pcs.stream().filter(s -> !s.isBlank()).findAny().isPresent()) {
+					Files.write(outputFile, pcs, StandardOpenOption.APPEND);
+				}
 			} catch (final MalformedInputException e) {
 			} catch (final IOException e) {
 				Logger.logError(p.toString());

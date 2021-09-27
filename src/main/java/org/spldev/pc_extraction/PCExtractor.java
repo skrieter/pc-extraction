@@ -24,6 +24,7 @@ package org.spldev.pc_extraction;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.*;
 
 import org.spldev.formula.clauses.*;
 import org.spldev.pc_extraction.convert.*;
@@ -47,13 +48,30 @@ public class PCExtractor {
 		this.groupingValue = groupingValue;
 	}
 
+	public void deleteExpressionFiles(Path outputPath, String systemName) throws Exception {
+		final Path pcListDir = outputPath.resolve("pclist").resolve(systemName);
+		final Path extractDir = outputPath.resolve("extract").resolve(systemName);
+		if (Files.exists(pcListDir)) {
+			Files.walk(pcListDir)
+				.sorted(Comparator.reverseOrder())
+				.map(Path::toFile)
+				.forEach(File::delete);
+		}
+		if (Files.exists(extractDir)) {
+			Files.walk(extractDir)
+				.sorted(Comparator.reverseOrder())
+				.map(Path::toFile)
+				.forEach(File::delete);
+		}
+	}
+
 	public Expressions extract(Path outputPath, Path systemPath, CNF fmFormula) throws Exception {
 		final Path pcListDir = outputPath.resolve("pclist").resolve(systemPath.getFileName());
-		final Path extractDir = outputPath.resolve("extract");
+		final Path extractDir = outputPath.resolve("extract").resolve(systemPath.getFileName());
 		Files.createDirectories(pcListDir);
 		Files.createDirectories(extractDir);
 
-		extract(systemPath, extractDir);
+		extract(systemPath, extractDir.getParent());
 		final PresenceConditionList pcList = convert(fmFormula, extractDir, pcListDir);
 		final Expressions expressions = group(pcList, pcListDir);
 		return expressions;
