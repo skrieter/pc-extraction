@@ -25,7 +25,7 @@ package org.spldev.pc_extraction.convert;
 import java.io.*;
 import java.util.*;
 
-import org.spldev.formula.clauses.*;
+import org.spldev.clauses.*;
 
 public class PresenceConditionList extends ArrayList<PresenceCondition> implements Serializable {
 

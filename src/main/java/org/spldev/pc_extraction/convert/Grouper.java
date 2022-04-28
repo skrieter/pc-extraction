@@ -26,9 +26,9 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-import org.spldev.formula.analysis.sat4j.twise.*;
-import org.spldev.formula.clauses.*;
-import org.spldev.formula.expression.atomic.literal.*;
+import org.spldev.analysis.sat4j.twise.*;
+import org.spldev.clauses.*;
+import org.spldev.formula.structure.atomic.literal.*;
 
 public class Grouper {
 

@@ -27,8 +27,8 @@ import java.net.*;
 import java.nio.file.*;
 import java.util.*;
 
-import org.spldev.formula.clauses.*;
-import org.spldev.formula.clauses.LiteralList.*;
+import org.spldev.clauses.*;
+import org.spldev.clauses.LiteralList.*;
 
 public class PresenceCondition implements Serializable {
 

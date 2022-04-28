@@ -28,10 +28,12 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.*;
 
-import org.spldev.formula.clauses.*;
-import org.spldev.formula.expression.atomic.literal.*;
-import org.spldev.formula.expression.io.*;
-import org.spldev.formula.expression.term.*;
+import org.spldev.clauses.*;
+import org.spldev.formula.io.dimacs.*;
+import org.spldev.formula.structure.atomic.literal.*;
+import org.spldev.formula.structure.term.*;
+import org.spldev.transform.*;
+import org.spldev.util.job.*;
 
 public class KconfigDimacsReader {
 
@@ -55,7 +57,7 @@ public class KconfigDimacsReader {
 			.filter(variable -> !featureNames.contains("CONFIG_" + variable)) //
 			.distinct() //
 			.collect(Collectors.toSet());
-		final CNF slicedCNF = Clauses.slice(cnf, dirtyVariables);
+		final CNF slicedCNF = Executor.run(new CNFSlicer(dirtyVariables, cnf.getVariableMap()), cnf).get();
 
 		final VariableMap slicedVariables = slicedCNF.getVariableMap();
 		final VariableMap newVariables = VariableMap.fromNames(featureNames);
